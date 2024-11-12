@@ -5,3 +5,4 @@ google-generativeai
 python-dotenv
 einops
 toml
+google-cloud-secret-manager
