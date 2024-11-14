@@ -34,7 +34,7 @@ Issue Sphere is an intelligent system that uses vector search and AI to find rel
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/adityamakhija03/ISSUE-SPHERE.git
+https://github.com/amitvad/hackathon.git
 ```
 
 2. Install required packages:
