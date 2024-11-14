@@ -109,11 +109,11 @@ streamlit run appp.py
 
 ## 👥 Authors
 
-- Aditya Makhija (@adityamakhija03)
+- Amit Vadhel
 
 ## 📞 Support
 
-For support, email aditya3makhija@gmail.com or create an issue in the repository.
+For support, email amitvad@gmail.com or create an issue in the repository.
 
 ## 🔮 Future Enhancements
 
