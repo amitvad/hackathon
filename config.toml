@@ -12,3 +12,8 @@ title = "Cluster Finder for issues"
 image_path = "./issue sphere.jpg"
 image_width = 150
 file_path = "./50_claim.csv"
+
+[keys]
+secret_id = "APIKEY_GEMINIFLASH"
+secret_id_mongo_uri = "MONGODB_URL"
+project_id = "gen-lang-client-0775295892" 

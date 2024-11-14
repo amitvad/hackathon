@@ -1,10 +1,10 @@
 import streamlit as st
 from pymongo import MongoClient
+from google.cloud import secretmanager
 from sentence_transformers import SentenceTransformer
 import google.generativeai as genai
 import pandas as pd
 import toml
-from config.py import gemini_api, mongo_uri
 
 # Configure page
 st.set_page_config(
@@ -26,7 +26,7 @@ def load_config():
 def initialize_models(config):
     try:
         model = SentenceTransformer(config["model"]["sentence_transformer"], trust_remote_code=True)
-        genai.configure(api_key=gemini_api)
+        genai.configure(api_key=config["api"]["google_api_key"])
         return model, genai.GenerativeModel(config["model"]["gemini_model"])
     except Exception as e:
         st.error(f"Failed to initialize models: {str(e)}")
@@ -36,7 +36,7 @@ def initialize_models(config):
 @st.cache_resource
 def initialize_mongodb(config):
     try:
-        client = MongoClient(gemini_api, serverSelectionTimeoutMS=5000)
+        client = MongoClient(config["mongodb"]["uri"], serverSelectionTimeoutMS=5000)
         client.server_info()  # Verify connection
         db = client[config["mongodb"]["database"]]
         return db
@@ -60,6 +60,17 @@ def load_csv_data(file_path):
     except Exception as e:
         st.error(f"Failed to load CSV file: {str(e)}")
         return None
+    
+# Initialize the Secret Manager client
+def get_secret(secret_id, project_id):
+    client = secretmanager.SecretManagerServiceClient()
+    # Construct the resource name of the secret version
+    name = f"projects/{project_id}/secrets/{secret_id}/versions/latest"
+    # Access the secret version
+    response = client.access_secret_version(name=name)
+    # Get the secret payload and decode it
+    secret_value = response.payload.data.decode("UTF-8")
+    return secret_value
 
 def main():
     # Load configuration
@@ -68,13 +79,21 @@ def main():
         st.error("Cannot proceed without configuration. Please check config.toml file.")
         return
 
-    # Page Header
-    try:
-        st.image(config["app"]["image_path"], width=config["app"]["image_width"])
-    except:
-        st.warning("Logo image not found. Please check the image path.")
+    # # Page Header
+    # try:
+    #     st.image(config["app"]["image_path"], width=config["app"]["image_width"])
+    # except:
+    #     st.warning("Logo image not found. Please check the image path.")
 
     st.title(config["app"]["title"])
+    try:
+        secret_value = get_secret(config["keys"]["secret_id"], config["keys"]["project_id"])
+        secret_mongo_uri = get_secret(config["keys"]["secret_id_mongo_uri"], config["keys"]["project_id"])
+        st.title(config["app"]["title"])
+        st.write("Retrieved Gemini Secret:", secret_value)
+        st.write("Retrieved MongoDB Secret:", secret_mongo_uri)
+    except Exception as e:
+        st.error(f"Error retrieving secret: {e}")
 
     # Initialize models and MongoDB
     model, gemini_model = initialize_models(config)
